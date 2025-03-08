@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import './index.css';
 import {
     createColumnHelper,
@@ -8,45 +8,6 @@ import {
     getFilteredRowModel,
     getSortedRowModel
 } from '@tanstack/react-table';
-import { io } from 'socket.io-client'
-
-const defaultData = [
-    {
-        fridge_id: 1,
-        instrument_name: "instrument_one",
-        parameter_name: "flux_bias",
-        applied_value: 0.37,
-        timestamp: 1739596596
-    },
-    {
-        fridge_id: 2,
-        instrument_name: "instrument_two",
-        parameter_name: "temperature",
-        applied_value: -0.12,
-        timestamp: 1739597890
-    },
-    {
-        fridge_id: 3,
-        instrument_name: "instrument_three",
-        parameter_name: "power_level",
-        applied_value: 1.25,
-        timestamp: 1739601234
-    },
-    {
-        fridge_id: 1,
-        instrument_name: "instrument_four",
-        parameter_name: "current_bias",
-        applied_value: 0.89,
-        timestamp: 1739612345
-    },
-    {
-        fridge_id: 2,
-        instrument_name: "instrument_five",
-        parameter_name: "voltage",
-        applied_value: 0.02,
-        timestamp: 1739623456
-    }
-];
 
 const columnHelper = createColumnHelper();
 
@@ -67,59 +28,43 @@ const columns = [
         cell: info => info.getValue(),
         filterFn: 'includesString',
     }),
-    columnHelper.accessor('applied_value', {
-        header: 'Value',
+    columnHelper.accessor('average', {
+        header: 'Average',
         cell: info => info.getValue(),
         filterFn: 'inNumberRange',
     }),
-    columnHelper.accessor('timestamp', {
-        header: 'Timestamp',
-        cell: info => new Date(info.getValue() * 1000).toLocaleString(),
+    columnHelper.accessor('min', {
+        header: 'Minimum',
+        cell: info => info.getValue(),
+        filterFn: 'inNumberRange',
+    }),
+    columnHelper.accessor('max', {
+        header: 'Maximum',
+        cell: info => info.getValue(),
+        filterFn: 'inNumberRange',
+    }),
+    columnHelper.accessor('count', {
+        header: 'Count',
+        cell: info => info.getValue(),
         filterFn: 'inNumberRange',
     }),
 ];
 
-export default function Table({ pageNum, liveMode, totalPages, setTotalPages, setLiveMode }) {
-    const [data, setData] = useState([...defaultData]);
-    const tableContainerRef = useRef(null)
-
+export default function Analytics({ pageNum, liveMode }) {
+    const [data, setData] = useState();
     useEffect(() => {
         const url = liveMode
-            ? `http://127.0.0.1:5000/api/settings?page=${pageNum}&per_page=10&live_mode=true`
-            : `http://127.0.0.1:5000/api/settings?live_mode=false`;
-
+            ? `http://127.0.0.1:5000/api/analytics?page=${pageNum}&per_page=10&live_mode=true`
+            : `http://127.0.0.1:5000/api/analytics?live_mode=false`;
 
         fetch(url)
             .then(response => response.json())
             .then(result => {
-                setData(result.data);
-                if (liveMode) setTotalPages(result.total)
+                console.log(result)
+                setData(result);
             })
             .catch(error => console.error('Error:', error));
-
-        if (liveMode) {
-
-        }
-    }, [pageNum, liveMode, setTotalPages])
-
-    useEffect(() => {
-        if (liveMode) {
-            const newSocket = io('http://127.0.0.1:5000');
-
-            newSocket.on('live_data', (newData) => {
-                setData(prevData => {
-
-                    if (pageNum === totalPages && prevData?.length <= 9) { return [...prevData, newData] }
-                    else
-                        return prevData
-                });
-                setTotalPages(prevPageCount => { if (prevPageCount !== newData.total) return newData.total; else return prevPageCount; })
-            });
-
-            return () => newSocket.disconnect();
-        }
-    }, [liveMode, pageNum, totalPages, setTotalPages]);
-
+    }, [pageNum, liveMode])
     const [sorting, setSorting] = useState([]);
     const [filters, setFilters] = useState([
         {
@@ -132,19 +77,23 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
             id: 'parameter_name', value: '', filterFn: 'includesString', type: 'string'
         },
         {
-            id: 'applied_value', value: ['', ''], filterFn: 'inNumberRange', type: 'number'
+            id: 'average', value: ['', ''], filterFn: 'inNumberRange', type: 'number'
         },
         {
-            id: 'timestamp', value: ['', ''], filterFn: 'inNumberRange', type: 'number'
+            id: 'min', value: ['', ''], filterFn: 'inNumberRange', type: 'number'
+        },
+        {
+            id: 'max', value: ['', ''], filterFn: 'inNumberRange', type: 'number'
+        },
+        {
+            id: 'count', value: ['', ''], filterFn: 'inNumberRange', type: 'number'
         },
     ]);
 
     const activeFilters = useMemo(() => filters.filter(filter => {
         if (filter.type === 'number' && Array.isArray(filter.value)) {
-            // For range filters, only include if at least one value is non-empty
             return filter.value[0] !== '' || filter.value[1] !== '';
         }
-        // For single value filters, only include if value is non-empty
         return filter.value !== '';
     }), [filters]);
 
@@ -163,6 +112,7 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
     });
 
     const handleFilterChange = (columnId, value, isRange = false, rangeType = '') => {
+        console.log(value, columnId)
         const newFilter = filters.map(filter => {
             const newValue = filter.type === 'number' && value !== '' ? Number(value) : value
             if (filter.id === columnId && !isRange) {
@@ -171,7 +121,6 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
                     value: newValue
                 }
             } else if (filter.id === columnId && isRange) {
-
                 return {
                     ...filter,
                     value: rangeType === 'min' ? [newValue, filter.value[1]] : [filter.value[0], newValue]
@@ -180,32 +129,15 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
                 return filter
             }
         })
+        console.log(newFilter)
         setFilters(newFilter)
     };
-
-    const fetchMoreOnBottomReached = useCallback(
-        (containerRefElement) => {
-            if (containerRefElement && !liveMode) {
-                const { scrollHeight, scrollTop, clientHeight } = containerRefElement
-                if (scrollHeight - scrollTop - clientHeight <= 500) {
-                    fetch(`http://127.0.0.1:5000/api/settings?live_mode=false`)
-                        .then(response => response.json())
-                        .then(result => {
-                            setData(result.data);
-                        })
-                        .catch(error => console.error('Error:', error));
-                }
-            }
-        },
-        [liveMode]
-    )
-
+    if (!data) {
+        return <p>Loading...</p>
+    }
     return (
         <div className="container">
-            <div style={{ padding: '50px', display: 'flex', alignContent: 'center', justifyContent: 'center' }}>
-                <button onClick={() => setLiveMode(prevMode => !prevMode)} >{liveMode ? 'Infinte Scrolling' : 'Switch to Live Mode'}</button>
-            </div>
-            <div className="filters">
+            <div className="filters" >
                 <div className="filter-group">
                     <label>Fridge ID:</label>
                     <input
@@ -243,49 +175,86 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
                     </button>
                 </div>
                 <div className="filter-group">
-                    <label>Value Range:</label>
+                    <label>Average Range:</label>
                     <input
                         type="number"
                         value={filters[3].value[0]}
-                        onChange={e => handleFilterChange('applied_value', e.target.value, true, 'min')}
+                        onChange={e => handleFilterChange('average', e.target.value, true, 'min')}
                         placeholder="Min Value"
                     />
                     <input
                         type="number"
                         value={filters[3].value[1]}
-                        onChange={e => handleFilterChange('applied_value', e.target.value, true, 'max')}
+                        onChange={e => handleFilterChange('average', e.target.value, true, 'max')}
                         placeholder="Max Value"
                     />
-                    <button onClick={() => { handleFilterChange('applied_value', '', true, 'min'); handleFilterChange('applied_value', '', true, 'max') }} >
-                        Clear Value Filter
+                    <button onClick={() => { handleFilterChange('average', '', true, 'min'); handleFilterChange('average', '', true, 'max') }} >
+                        Clear Average Filter
                     </button>
                 </div>
                 <div className="filter-group">
-                    <label>Timestamp Range:</label>
+                    <label>Minimum Range:</label>
                     <input
-                        type="datetime-local"
-                        value={filters[4].value[0] ? new Date(filters[4].value[0] * 1000).toISOString().slice(0, 16) : ''}
-                        onChange={e => handleFilterChange('timestamp', new Date(e.target.value).getTime() * 0.001, true, 'min')}
+                        type="number"
+                        value={filters[4].value[0]}
+                        onChange={e => handleFilterChange('min', e.target.value, true, 'min')}
+                        placeholder="Min Value"
                     />
                     <input
-                        type="datetime-local"
-                        value={filters[4].value[1] ? new Date(filters[4].value[1] * 1000).toISOString().slice(0, 16) : ''}
-                        onChange={e => handleFilterChange('timestamp', new Date(e.target.value).getTime() * 0.001, true, 'max')}
+                        type="number"
+                        value={filters[4].value[1]}
+                        onChange={e => handleFilterChange('min', e.target.value, true, 'max')}
+                        placeholder="Max Value"
                     />
-                    <button onClick={() => { handleFilterChange('timestamp', '', true, 'min'); handleFilterChange('timestamp', '', true, 'max') }} >
-                        Clear Timestamp Filter
+                    <button onClick={() => { handleFilterChange('min', '', true, 'min'); handleFilterChange('min', '', true, 'max') }} >
+                        Clear Minimum Filter
+                    </button>
+                </div>
+                <div className="filter-group">
+                    <label>Maximum Range:</label>
+                    <input
+                        type="number"
+                        value={filters[5].value[0]}
+                        onChange={e => handleFilterChange('max', e.target.value, true, 'min')}
+                        placeholder="Min Value"
+                    />
+                    <input
+                        type="number"
+                        value={filters[5].value[1]}
+                        onChange={e => handleFilterChange('max', e.target.value, true, 'max')}
+                        placeholder="Max Value"
+                    />
+                    <button onClick={() => { handleFilterChange('max', '', true, 'min'); handleFilterChange('max', '', true, 'max') }} >
+                        Clear Maximum Filter
+                    </button>
+                </div>
+                <div className="filter-group">
+                    <label>Count Range:</label>
+                    <input
+                        type="number"
+                        value={filters[6].value[0]}
+                        onChange={e => handleFilterChange('count', e.target.value, true, 'min')}
+                        placeholder="Min Value"
+                    />
+                    <input
+                        type="number"
+                        value={filters[6].value[1]}
+                        onChange={e => handleFilterChange('count', e.target.value, true, 'max')}
+                        placeholder="Max Value"
+                    />
+                    <button onClick={() => { handleFilterChange('count', '', true, 'min'); handleFilterChange('count', '', true, 'max') }} >
+                        Clear Count Filter
                     </button>
                 </div>
             </div>
             <div className='table-container'
-                onScroll={e => fetchMoreOnBottomReached(e.currentTarget)}
-                ref={tableContainerRef}
+
                 style={{
                     overflow: 'auto',
                     position: 'relative',
                     height: '600px',
                 }}>
-                <table className="data-table">
+                <table className="data-table" >
                     <thead>
                         {table.getHeaderGroups().map(headerGroup => (
                             <tr key={headerGroup.id}>
@@ -308,7 +277,7 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
                             </tr>
                         ))}
                     </thead>
-                    <tbody className='tb'>
+                    <tbody>
                         {table.getRowModel().rows.map(row => (
                             <tr key={row.id}>
                                 {row.getVisibleCells().map(cell => (
@@ -321,6 +290,6 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div >
     );
 }

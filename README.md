@@ -21,11 +21,11 @@
 
 ## Bonus
 
-- [ ] Live mode. Create a websocket server to serve the data to the frontend live (randomly generate instrument values)
-- [ ] Server side paging/infinite scroll for historical data
-  - [ ] For historical data implement server side pagination (randomly generate instrument values).
-  - [ ] On the client side implement infinite scrolling if not in live mode
-- [ ] Provide aggregate analytics for instrument values on a /analytics route
+- [x] Live mode. Create a websocket server to serve the data to the frontend live (randomly generate instrument values)
+- [x] Server side paging/infinite scroll for historical data
+  - [x] For historical data implement server side pagination (randomly generate instrument values).
+  - [x] On the client side implement infinite scrolling if not in live mode
+- [x] Provide aggregate analytics for instrument values on a /analytics route
 
 Example data
 
