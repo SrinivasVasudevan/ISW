@@ -72,7 +72,7 @@ Example data
 
 ## Setup information
 
-> **_NOTE:_** This setup is only required if you decide to manually run the application. Ideally there should be a docker step available for ease of setup.
+> **_NOTE:_** Please checkout docker-setup branch for docker setup instructions and updated docker code.
 
 To run this locally, perform the following tasks sequentially:
 
