@@ -4,9 +4,9 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: ./backend/Dockerfile.backend
     ports:
-      - "5000:5000"
+      - "5001:5000" # change ports here if required
     environment:
       - FLASK_ENV=development
     volumes:
@@ -17,9 +17,9 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
+      dockerfile: ./frontend/Dockerfile.frontend
     ports:
-      - "3000:3000"
+      - "3000:3000" # change ports here if required
     depends_on:
       - backend
     environment:

@@ -85,8 +85,8 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
 
     useEffect(() => {
         const url = liveMode
-            ? `http://127.0.0.1:5000/api/settings?page=${pageNum}&per_page=10&live_mode=true`
-            : `http://127.0.0.1:5000/api/settings?live_mode=false`;
+            ? `http://127.0.0.1:5001/api/settings?page=${pageNum}&per_page=10&live_mode=true`
+            : `http://127.0.0.1:5001/api/settings?live_mode=false`;
 
 
         fetch(url)
@@ -104,7 +104,7 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
 
     useEffect(() => {
         if (liveMode) {
-            const newSocket = io('http://127.0.0.1:5000');
+            const newSocket = io('http://127.0.0.1:5001');
 
             newSocket.on('live_data', (newData) => {
                 setData(prevData => {
@@ -188,7 +188,7 @@ export default function Table({ pageNum, liveMode, totalPages, setTotalPages, se
             if (containerRefElement && !liveMode) {
                 const { scrollHeight, scrollTop, clientHeight } = containerRefElement
                 if (scrollHeight - scrollTop - clientHeight <= 500) {
-                    fetch(`http://127.0.0.1:5000/api/settings?live_mode=false`)
+                    fetch(`http://127.0.0.1:5001/api/settings?live_mode=false`)
                         .then(response => response.json())
                         .then(result => {
                             setData(result.data);

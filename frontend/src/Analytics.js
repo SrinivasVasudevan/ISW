@@ -54,8 +54,8 @@ export default function Analytics({ pageNum, liveMode }) {
     const [data, setData] = useState();
     useEffect(() => {
         const url = liveMode
-            ? `http://127.0.0.1:5000/api/analytics?page=${pageNum}&per_page=10&live_mode=true`
-            : `http://127.0.0.1:5000/api/analytics?live_mode=false`;
+            ? `http://127.0.0.1:5001/api/analytics?page=${pageNum}&per_page=10&live_mode=true`
+            : `http://127.0.0.1:5001/api/analytics?live_mode=false`;
 
         fetch(url)
             .then(response => response.json())

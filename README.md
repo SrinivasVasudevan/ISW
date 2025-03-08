@@ -70,7 +70,7 @@ Example data
 }
 ```
 
-## Setup information
+## Setup information - manual
 
 > **_NOTE:_** This setup is only required if you decide to manually run the application. Ideally there should be a docker step available for ease of setup.
 
@@ -90,4 +90,11 @@ To run this locally, perform the following tasks sequentially:
 1. run `npm install`
 2. run `npm start`
 
-> **_NOTE:_** The backend would ideally be setup in port :5000 and the frontend would be setup in :3000 (although this is not strictly necessary for the application to work)
+> **_NOTE:_** The backend would ideally be setup in port :5001 and the frontend would be setup in :3000 (although this is not strictly necessary for the application to work)
+
+## Setup information - docker
+
+> **_NOTE:_** Currently the backend is configured at :5001 for the backend and :3000 for the frontend. If the ports are busy, feel free to switch them up in docker-compose.yml at the commented location
+
+0. Ensure docker daemon is running (start up docker desktop if available).
+1. run `docker-compose up`

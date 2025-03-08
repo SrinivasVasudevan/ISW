@@ -12,8 +12,8 @@ export default function App() {
 
   useEffect(() => {
     const url = liveMode
-      ? `http://127.0.0.1:5000/api/settings?page=${page}&per_page=10&live_mode=true`
-      : `http://127.0.0.1:5000/api/settings?live_mode=false`;
+      ? `http://127.0.0.1:5001/api/settings?page=${page}&per_page=10&live_mode=true`
+      : `http://127.0.0.1:5001/api/settings?live_mode=false`;
 
     console.log(url)
 
