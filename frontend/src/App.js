@@ -4,6 +4,7 @@ import './App.css'
 import Analytics from './Analytics';
 import { useState, useEffect } from 'react';
 import Pagination from './Pagination';
+import Home from './Home';
 
 export default function App() {
   const [liveMode, setLiveMode] = useState(false);
@@ -34,6 +35,7 @@ export default function App() {
     <>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/settings" element={<Table totalPages={totalPages} setTotalPages={setTotalPages} liveMode={liveMode} pageNum={page} setLiveMode={setLiveMode} />} />
           <Route path="/analytics" element={<Analytics />} />
         </Routes>
