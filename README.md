@@ -70,6 +70,8 @@ Example data
 }
 ```
 
+> **_NOTE:_** After successful setup hit /settings and /analytics path to see the challenge solution
+
 ## Setup information - manual
 
 > **_NOTE:_** This setup is only required if you decide to manually run the application. Ideally there should be a docker step available for ease of setup.
