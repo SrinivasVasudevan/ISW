@@ -81,7 +81,7 @@ To run this locally, perform the following tasks sequentially:
 0. Ensure that your current working directory is /path/to/ISW, run `pwd` to verify that.
 1. python3 -m venv <env_name>
 2. source /path/to/env_name/activate
-3. pip install -r requirements.txt
+3. pip install -r /path/to/ISW/backend/requirements.txt
 4. python3 backend/backend.py
 
 ### Setting up frontend
