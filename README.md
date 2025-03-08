@@ -70,6 +70,8 @@ Example data
 }
 ```
 
+> **_NOTE:_** After successful setup hit /settings and /analytics path to see the challenge solution
+
 ## Setup information
 
 > **_NOTE:_** Please checkout docker-setup branch for docker setup instructions and updated docker code.
